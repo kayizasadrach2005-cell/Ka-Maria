@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Question For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blush-1: #ffe3ea;
+    --blush-2: #ffc7d4;
+    --wine: #5c2233;
+    --wine-soft: #8a3b52;
+    --rose: #d94f70;
+    --rose-deep: #b5335a;
+    --gold: #e8b86d;
+    --cream: #fff7f2;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Quicksand', sans-serif;
+    background: radial-gradient(ellipse at 50% 20%, var(--blush-1), var(--blush-2) 70%);
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px 20px 32px;
+    transition: opacity 0.6s ease;
+    overflow-y: auto;
+  }
+
+  .screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .message {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--wine-soft);
+    font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+    max-width: 460px;
+    line-height: 1.6;
+    margin: 0 0 1.2rem 0;
+    padding: 0 8px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    color: var(--wine);
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    margin: 0 0 0.4rem 0;
+    letter-spacing: 0.01em;
+  }
+
+  .eyebrow {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--wine-soft);
+    font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+    margin-bottom: 1.4rem;
+    opacity: 0.85;
+    min-height: 1.6em;
+    transition: all 0.3s ease;
+  }
+
+  .button-row {
+    position: relative;
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+    width: min(90vw, 420px);
+    height: 90px;
+  }
+
+  button {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    padding: 0.9em 1.6em;
+    font-size: 1.05rem;
+    box-shadow: 0 8px 20px rgba(181, 51, 90, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, font-size 0.25s ease, padding 0.25s ease;
+  }
+
+  #yesBtn {
+    background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+    color: var(--cream);
+  }
+
+  #yesBtn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 26px rgba(181, 51, 90, 0.35);
+  }
+
+  #noBtn {
+    background: var(--cream);
+    color: var(--wine-soft);
+    border: 1.5px solid var(--blush-2);
+    position: relative;
+    z-index: 5;
+    animation: wiggle 1.6s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-6deg); }
+    75% { transform: rotate(6deg); }
+  }
+
+  #noBtn.roaming {
+    animation: none;
+  }
+
+  #noBtn.roaming {
+    position: fixed;
+    z-index: 50;
+  }
+
+  .heart-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .heart {
+    position: absolute;
+    top: -10%;
+    font-size: 1.4rem;
+    animation: fall linear forwards;
+    opacity: 0.9;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(115vh) rotate(360deg);
+      opacity: 0.2;
+    }
+  }
+
+  #celebrate h1 {
+    font-size: clamp(2.2rem, 8vw, 4rem);
+  }
+
+  #celebrate p {
+    color: var(--wine-soft);
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    max-width: 480px;
+    line-height: 1.5;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+
+  .tries {
+    font-size: 0.85rem;
+    color: var(--wine-soft);
+    opacity: 0.6;
+    margin-top: 1.8rem;
+    letter-spacing: 0.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .heart { animation: none; display: none; }
+    button, .screen { transition: none; }
+    #noBtn { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <div class="heart-field" id="heartField"></div>
+
+  <div class="screen" id="ask">
+    <h1 id="question">Will you be my girlfriend, Ka-Maria?</h1>
+    <div class="eyebrow" id="eyebrow">&nbsp;</div>
+    <div class="button-row">
+      <button id="yesBtn" onclick="sayYes()">Yes</button>
+      <button id="noBtn" ontouchstart="dodge(event)" onclick="dodge(event)">No</button>
+    </div>
+    <div class="tries" id="tries"></div>
+  </div>
+
+  <div class="screen hidden" id="celebrate">
+    <h1>Yes! 🎉</h1>
+    <p>Ka-Maria said yes. Best news I've had all year — here's to us.</p>
+  </div>
+
+</div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const eyebrow = document.getElementById('eyebrow');
+  const triesEl = document.getElementById('tries');
+  const buttonRow = document.querySelector('.button-row');
+
+  let attempts = 0;
+  let yesScale = 1;
+
+  const lines = [
+    "Wait, really? Think about it...",
+    "Are you sure about that?",
+    "Take your time, I'll wait.",
+    "Hmm, one more chance to reconsider?",
+    "Okay but really, truly sure?",
+    "This button is getting tired of running.",
+    "Last call, I promise (kind of).",
+    "I mean... look at that Yes button.",
+  ];
+
+  function dodge(e) {
+    if (e) e.preventDefault();
+    attempts++;
+
+    if (attempts === 1) {
+      const rect = buttonRow.getBoundingClientRect();
+      noBtn.classList.add('roaming');
+      noBtn.style.left = rect.left + 'px';
+      noBtn.style.top = rect.top + 'px';
+      // force layout before we start moving it
+      noBtn.getBoundingClientRect();
+    }
+
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+    const margin = 20;
+    const maxX = window.innerWidth - btnW - margin;
+    const maxY = window.innerHeight - btnH - margin;
+    const newX = Math.max(margin, Math.random() * maxX);
+    const newY = Math.max(margin, Math.random() * maxY);
+
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top = newY + 'px';
+
+    yesScale = Math.min(2.2, 1 + attempts * 0.12);
+    yesBtn.style.fontSize = (1.05 * yesScale) + 'rem';
+    yesBtn.style.padding = (0.9 * yesScale) + 'em ' + (1.6 * yesScale) + 'em';
+
+    eyebrow.textContent = lines[Math.min(attempts - 1, lines.length - 1)];
+    triesEl.textContent = attempts > 2 ? ("attempts to say no: " + attempts) : "";
+  }
+
+  function sayYes() {
+    spawnHearts(40);
+    document.getElementById('ask').classList.add('hidden');
+    setTimeout(() => {
+      document.getElementById('celebrate').classList.remove('hidden');
+    }, 300);
+  }
+
+  function spawnHearts(count) {
+    const field = document.getElementById('heartField');
+    const emojis = ['💕', '💖', '💗', '💓', '❤️'];
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      h.style.left = Math.random() * 100 + 'vw';
+      h.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+      h.style.animationDuration = (3 + Math.random() * 3) + 's';
+      h.style.animationDelay = (Math.random() * 1.5) + 's';
+      field.appendChild(h);
+      setTimeout(() => h.remove(), 8000);
+    }
+  }
+
+  // gentle ambient hearts even before the answer
+  setInterval(() => spawnHearts(1), 1800);
+</script>
+
+</body>
+</html>
